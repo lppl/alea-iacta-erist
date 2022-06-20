@@ -1,12 +1,12 @@
 {
-  "name": "dice-roll",
+  "name": "@pietrek/alea-iacta-erist",
   "version": "1.0.0",
-  "description": "",
+  "description": "One library to cast them dices all.",
   "type": "commonjs",
   "scripts": {
     "test": "jest"
   },
-  "author": "",
+  "author": "Lukasz Pietre <lpietrek@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "@tsconfig/node16": "1.0.3",
