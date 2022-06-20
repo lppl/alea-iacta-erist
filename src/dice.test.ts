@@ -13,26 +13,22 @@ describe('Dice', () => {
 
   test('By default is k6 dice', () => {
     const k6 = createDice();
-    expect(k6.min).toBe(1);
-    expect(k6.max).toBe(6);
+    expect(k6.size).toBe(6);
   });
 
   test('Can be k10 dice', () => {
-    const k6 = createDice({ min: 1, max: 10 });
-    expect(k6.min).toBe(1);
-    expect(k6.max).toBe(10);
+    const k6 = createDice({ size: 10 });
+    expect(k6.size).toBe(10);
   });
 
   test.each`
-    params                    | error
-    ${{ min: 0.5, max: 6 }}   | ${'Cannot create dice. "min" must be positive integer'}
-    ${{ min: 0.5, max: 4.5 }} | ${'Cannot create dice. "min" must be positive integer'}
-    ${{ min: '1', max: 4.5 }} | ${'Cannot create dice. "min" must be positive integer'}
-    ${{ min: 1, max: 4.5 }}   | ${'Cannot create dice. "max" must be positive integer'}
-    ${{ min: 1, max: '6' }}   | ${'Cannot create dice. "max" must be positive integer'}
-    ${{ min: -6, max: 6 }}    | ${'Cannot create dice. "min" must be positive integer'}
-    ${{ min: 6, max: 1 }}     | ${'Cannot create dice. "min" must be smaller that "max"'}
-    ${{ min: 1, max: 1 }}     | ${'Cannot create dice. "min" must be smaller that "max"'}
+    params            | error
+    ${{ size: -1 }}   | ${'Dice will not fly with this size'}
+    ${{ size: 4.5 }}  | ${'Dice will not fly with this size'}
+    ${{ size: -4.5 }} | ${'Dice will not fly with this size'}
+    ${{ size: '6' }}  | ${'Dice will not fly with this size'}
+    ${{ size: null }} | ${'Dice will not fly with this size'}
+    ${{ size: NaN }}  | ${'Dice will not fly with this size'}
   `('Have proper parameters validation: $params', ({ params, error }) => {
     expect(() => createDice(params)).toThrowError(error);
   });
@@ -49,13 +45,13 @@ describe('Dice', () => {
   `(
     'Does complain about incorrect roll input like: $number for k$size dice',
     ({ number, size }) => {
-      const dice = createDice({ min: 1, max: size });
+      const dice = createDice({ size });
       expect(() => dice.roll(number)).toThrowError('Dice will not roll');
     },
   );
 
   test.each`
-    name           | sides
+    name           | size
     ${'coin flip'} | ${2}
     ${'k3'}        | ${3}
     ${'k4'}        | ${4}
@@ -63,10 +59,10 @@ describe('Dice', () => {
     ${'k10'}       | ${10}
     ${'k20'}       | ${20}
     ${'k100'}      | ${100}
-  `('Produce good ranges for $name', ({ sides }) => {
-    const dice = createDice({ min: 1, max: sides });
+  `('Produce good ranges for $name', ({ size }) => {
+    const dice = createDice({ size });
     const bucketSize = 1000;
-    const totalRolls = sides * bucketSize;
+    const totalRolls = size * bucketSize;
     const step = 1 / (totalRolls + 1);
     const rolls = range(totalRolls)
       .map((n) => (n + 1) * step)
@@ -76,6 +72,6 @@ describe('Dice', () => {
         return o;
       }, [] as number[]);
 
-    expect(rolls).toEqual(range(sides).fill(bucketSize));
+    expect(rolls).toEqual(range(size).fill(bucketSize));
   });
 });
