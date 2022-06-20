@@ -53,10 +53,6 @@ describe('Dice', () => {
         return o;
       }, range(sides).fill(0));
 
-    const exp = range(sides).fill(bucketSize);
-    exp[0] += 1;
-    exp[sides - 1] -= 1;
-
     expect(rolls.reduce((sum, n) => sum + n, 0)).toEqual(totalRolls);
     expect(
       rolls
