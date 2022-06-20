@@ -2,8 +2,8 @@ import {
   assertIsInteger,
   assertIsPositive,
   assertNumberBetween,
-} from './assert';
-import { clamp, scale } from './math';
+} from './utils/assert';
+import { clamp, scale } from './utils/math';
 
 const { ceil } = Math;
 
