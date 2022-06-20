@@ -1,4 +1,4 @@
-import { assert, assertPositiveInteger, softAssert } from './assert';
+import { assert, assertNumberBetween, assertPositiveInteger } from './assert';
 import { clamp, scale } from './math';
 
 const { ceil } = Math;
@@ -11,12 +11,9 @@ export const createDice = ({ min = 1, max = 6 } = {}) => {
   return {
     min,
     max,
-    roll(number: number) {
-      softAssert(
-        number >= 0 && number <= 1,
-        'Number should be between 0 and 1',
-      );
-      return clamp(ceil(scale(number, min, max)), min, max);
+    roll(n: number) {
+      assertNumberBetween(n, 0, 1, 'n', 'Dice will not roll');
+      return clamp(ceil(scale(n, min, max)), min, max);
     },
   } as const;
 };

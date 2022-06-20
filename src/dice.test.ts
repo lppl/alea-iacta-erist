@@ -3,10 +3,24 @@ import { createDice } from './dice';
 const range = (n = 6) => Array.from(Array(n)).map((_n, i) => i);
 
 describe('Dice', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'assert');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   test('By default is k6 dice', () => {
     const k6 = createDice();
     expect(k6.min).toBe(1);
     expect(k6.max).toBe(6);
+  });
+
+  test('Can be k10 dice', () => {
+    const k6 = createDice({ min: 1, max: 10 });
+    expect(k6.min).toBe(1);
+    expect(k6.max).toBe(10);
   });
 
   test.each`
@@ -23,13 +37,22 @@ describe('Dice', () => {
     expect(() => createDice(params)).toThrowError(error);
   });
 
-  test('Rolls with numbers between 0 and 1 ', () => {
-    const k6 = createDice();
-    expect(k6.roll(-100)).toBe(1);
-    expect(k6.roll(-0.01)).toBe(1);
-    expect(k6.roll(1.01)).toBe(6);
-    expect(k6.roll(100)).toBe(6);
-  });
+  test.each`
+    number       | size
+    ${-1000}     | ${10}
+    ${-0.01}     | ${10}
+    ${10.01}     | ${10}
+    ${10000}     | ${10}
+    ${undefined} | ${10}
+    ${null}      | ${10}
+    ${'0.5'}     | ${10}
+  `(
+    'Does complain about incorrect roll input like: $number for k$size dice',
+    ({ number, size }) => {
+      const dice = createDice({ min: 1, max: size });
+      expect(() => dice.roll(number)).toThrowError('Dice will not roll');
+    },
+  );
 
   test.each`
     name           | sides
@@ -44,20 +67,15 @@ describe('Dice', () => {
     const dice = createDice({ min: 1, max: sides });
     const bucketSize = 1000;
     const totalRolls = sides * bucketSize;
-    const step = 1 / totalRolls;
+    const step = 1 / (totalRolls + 1);
     const rolls = range(totalRolls)
-      .map((n) => n * step)
+      .map((n) => (n + 1) * step)
       .map(dice.roll)
       .reduce((o, n) => {
-        o[n - 1] += 1;
+        o[n - 1] = Number(o[n - 1] || 0) + 1;
         return o;
-      }, range(sides).fill(0));
+      }, [] as number[]);
 
-    expect(rolls.reduce((sum, n) => sum + n, 0)).toEqual(totalRolls);
-    expect(
-      rolls
-        .map((count) => Math.abs(bucketSize - count))
-        .filter((diff) => diff > 1),
-    ).toHaveLength(0);
+    expect(rolls).toEqual(range(sides).fill(bucketSize));
   });
 });

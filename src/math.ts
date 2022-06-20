@@ -15,3 +15,6 @@ export const clamp = (n: number, min = 0, max = 1) => {
     return n;
   }
 };
+
+export const sum = (numbers: number[]) =>
+  numbers.reduce((sum, n) => sum + n, 0);
