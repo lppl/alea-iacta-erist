@@ -2,15 +2,7 @@ import { createDice } from './dice';
 
 const range = (n = 6) => Array.from(Array(n)).map((_n, i) => i);
 
-describe('Dice', () => {
-  beforeEach(() => {
-    jest.spyOn(console, 'assert');
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
+describe('Dice creation and rolling issues', () => {
   test('By default is k6 dice', () => {
     const k6 = createDice();
     expect(k6.size).toBe(6);
@@ -49,29 +41,36 @@ describe('Dice', () => {
       expect(() => dice.roll(number)).toThrowError('Dice will not roll');
     },
   );
+});
 
-  test.each`
+describe.each`
     name           | size
-    ${'coin flip'} | ${2}
+    ${'k2 or coin flip'} | ${2}
     ${'k3'}        | ${3}
     ${'k4'}        | ${4}
+    ${'k6'}        | ${6}
     ${'k8'}        | ${8}
     ${'k10'}       | ${10}
     ${'k20'}       | ${20}
     ${'k100'}      | ${100}
-  `('Produce good ranges for $name', ({ size }) => {
-    const dice = createDice({ size });
-    const bucketSize = 1000;
-    const totalRolls = size * bucketSize;
-    const step = 1 / (totalRolls + 1);
-    const rolls = range(totalRolls)
-      .map((n) => (n + 1) * step)
-      .map(dice.roll)
-      .reduce((o, n) => {
-        o[n - 1] = Number(o[n - 1] || 0) + 1;
-        return o;
-      }, [] as number[]);
+  `('rolled values for $name', ({ size }) => {
+  const dice = createDice({ size });
 
-    expect(rolls).toEqual(range(size).fill(bucketSize));
+  const smallestRoll = 0;
+  const highestRoll = 1;
+  const iDontCareAboutFloatPointEdgeCases = 1e-10;
+
+  test('rolls right smallestRoll', () => {
+    expect(dice.roll(smallestRoll)).toBe(1);
+  });
+
+  test('rolls right highestRoll', () => {
+    expect(dice.roll(highestRoll)).toBe(size);
+  });
+
+  test.each(range(size).slice(1))('rolls right on its %s breakpoint', (breakpoint) => {
+    const breakpointRoll = breakpoint / size;
+    expect(dice.roll(breakpointRoll - iDontCareAboutFloatPointEdgeCases)).toBe(breakpoint);
+    expect(dice.roll(breakpointRoll + iDontCareAboutFloatPointEdgeCases)).toBe(breakpoint + 1);
   });
 });
