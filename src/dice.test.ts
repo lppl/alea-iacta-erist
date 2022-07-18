@@ -1,6 +1,5 @@
 import { createDice } from './dice';
-
-const range = (n = 6) => Array.from(Array(n)).map((_n, i) => i);
+import { range } from './utils/collection';
 
 describe('Dice creation and rolling issues', () => {
   test('By default is k6 dice', () => {
@@ -44,16 +43,16 @@ describe('Dice creation and rolling issues', () => {
 });
 
 describe.each`
-    name           | size
-    ${'k2 or coin flip'} | ${2}
-    ${'k3'}        | ${3}
-    ${'k4'}        | ${4}
-    ${'k6'}        | ${6}
-    ${'k8'}        | ${8}
-    ${'k10'}       | ${10}
-    ${'k20'}       | ${20}
-    ${'k100'}      | ${100}
-  `('rolled values for $name', ({ size }) => {
+  name                 | size
+  ${'k2 or coin flip'} | ${2}
+  ${'k3'}              | ${3}
+  ${'k4'}              | ${4}
+  ${'k6'}              | ${6}
+  ${'k8'}              | ${8}
+  ${'k10'}             | ${10}
+  ${'k20'}             | ${20}
+  ${'k100'}            | ${100}
+`('rolled values for $name', ({ size }) => {
   const dice = createDice({ size });
 
   const smallestRoll = 0;
@@ -68,9 +67,16 @@ describe.each`
     expect(dice.roll(highestRoll)).toBe(size);
   });
 
-  test.each(range(size).slice(1))('rolls right on its %s breakpoint', (breakpoint) => {
-    const breakpointRoll = breakpoint / size;
-    expect(dice.roll(breakpointRoll - iDontCareAboutFloatPointEdgeCases)).toBe(breakpoint);
-    expect(dice.roll(breakpointRoll + iDontCareAboutFloatPointEdgeCases)).toBe(breakpoint + 1);
-  });
+  test.each(range(size).slice(1))(
+    'rolls right on its %s breakpoint',
+    (breakpoint) => {
+      const breakpointRoll = breakpoint / size;
+      expect(
+        dice.roll(breakpointRoll - iDontCareAboutFloatPointEdgeCases),
+      ).toBe(breakpoint);
+      expect(
+        dice.roll(breakpointRoll + iDontCareAboutFloatPointEdgeCases),
+      ).toBe(breakpoint + 1);
+    },
+  );
 });
