@@ -1,4 +1,5 @@
 import { clamp } from './math';
+import { Dice } from '../dice';
 
 declare const validFortune: unique symbol;
 
@@ -23,3 +24,16 @@ export const knownFortune = (...roll: number[]) => {
     return fortunate(roll[i]);
   };
 };
+
+export const fortuneForDice =
+  ({ size }: Dice) =>
+  (...roll: number[]): Fortune => {
+    let i = -1;
+    return () => {
+      i += 1;
+      if (typeof roll[i] === undefined) {
+        throw new Error(`We have no more rolls 😢 for roll ${i}`);
+      }
+      return fortunate((roll[i] - 0.5) / size);
+    };
+  };
